@@ -6,19 +6,16 @@ const articlesContainer = document.getElementById('articlesContainer');
 const articleForm = document.getElementById('articleForm');
 const sortSelect = document.getElementById('sortSelect');
 
-// Funkcja odpowiedzialna za pobieranie i wyswietlanie artykulow
 async function fetchArticles() {
-    // Pobieramy biezace ustawienie sortowania z selecta
     const [column, direction] = sortSelect.value.split('.');
     const isAscending = direction === 'asc';
 
     articlesContainer.innerHTML = '<p class="text-gray-500 animate-pulse">Aktualizowanie listy...</p>';
 
-    // Zapytanie do API Supabase z uwzglednieniem sortowania (Zadanie dodatkowe 2)
     const { data: articles, error } = await supabase
         .from('article')
         .select('*')
-        .order(column, { ascending: isAscending });[cite: 77]
+        .order(column, { ascending: isAscending });
 
     if (error) {
         console.error('Blad pobierania:', error.message);
@@ -31,10 +28,8 @@ async function fetchArticles() {
         return;
     }
 
-    // Renderowanie listy pobranych artykulow
     articlesContainer.innerHTML = articles.map(article => {
-        // Formatowanie daty do formatu DD-MM-YYYY (Zadanie dodatkowe 1)
-        const formattedDate = dayjs(article.created_at).format('DD-MM-YYYY');[cite: 75]
+        const formattedDate = dayjs(article.created_at).format('DD-MM-YYYY');
 
         return `
       <article class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition">
@@ -59,7 +54,6 @@ async function fetchArticles() {
     }).join('');
 }
 
-// Obsluga wysylania formularza (Tworzenie nowego artykulu)
 articleForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -69,7 +63,6 @@ articleForm.addEventListener('submit', async (e) => {
     const content = document.getElementById('content').value;
     const createdAtInput = document.getElementById('createdAt').value;
 
-    // Obiekt z danymi do wyslania
     const newArticle = {
         title,
         subtitle,
@@ -77,28 +70,23 @@ articleForm.addEventListener('submit', async (e) => {
         content
     };
 
-    // Jesli u¿ytkownik podal wlasna date, dodaj ja (Zadanie dodatkowe 3)
     if (createdAtInput) {
-        newArticle.created_at = dayjs(createdAtInput).toISOString();[cite: 78, 79]
+        newArticle.created_at = dayjs(createdAtInput).toISOString();
     }
 
-    // Zapytanie POST do API Supabase
     const { error } = await supabase
         .from('article')
-        .insert([newArticle]);[cite: 69]
+        .insert([newArticle]);
 
     if (error) {
         alert('Blad podczas dodawania artykulu: ' + error.message);
         return;
     }
 
-    // Reset formularza i odswiezenie widoku
     articleForm.reset();
     fetchArticles();
 });
 
-// Nasluchiwanie zmiany kryterium sortowania
-sortSelect.addEventListener('change', fetchArticles);[cite: 76]
+sortSelect.addEventListener('change', fetchArticles);
 
-// Pierwsze uruchomienie po zaladowaniu skryptu
 fetchArticles();
