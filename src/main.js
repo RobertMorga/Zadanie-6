@@ -1,66 +1,104 @@
 import './style.css'
 import dayjs from 'dayjs'
+import { supabase } from './supabase'
 
-document.addEventListener('DOMContentLoaded', () => {
+const articlesContainer = document.getElementById('articlesContainer');
+const articleForm = document.getElementById('articleForm');
+const sortSelect = document.getElementById('sortSelect');
 
-    const form = document.getElementById('birthdayForm');
-    const dialog = document.getElementById('resultDialog');
-    const closeDialogBtn = document.getElementById('closeDialog');
-    const dialogContent = document.getElementById('dialogContent');
+// Funkcja odpowiedzialna za pobieranie i wyswietlanie artykulow
+async function fetchArticles() {
+    // Pobieramy biezace ustawienie sortowania z selecta
+    const [column, direction] = sortSelect.value.split('.');
+    const isAscending = direction === 'asc';
 
-    if (!form || !dialog || !closeDialogBtn || !dialogContent) {
-        console.error("BLAD: Nie znaleziono elementow w HTML. Upewnij sie, ze masz poprawne ID w index.html!");
+    articlesContainer.innerHTML = '<p class="text-gray-500 animate-pulse">Aktualizowanie listy...</p>';
+
+    // Zapytanie do API Supabase z uwzglednieniem sortowania (Zadanie dodatkowe 2)
+    const { data: articles, error } = await supabase
+        .from('article')
+        .select('*')
+        .order(column, { ascending: isAscending });[cite: 77]
+
+    if (error) {
+        console.error('Blad pobierania:', error.message);
+        articlesContainer.innerHTML = '<p class="text-red-500">Nie udalo se pobrac artykulow.</p>';
         return;
     }
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
+    if (articles.length === 0) {
+        articlesContainer.innerHTML = '<p class="text-gray-500">Brak artykulow w bazie danych.</p>';
+        return;
+    }
 
-        const birthdateInput = document.getElementById('birthdate').value;
-        if (!birthdateInput) return;
+    // Renderowanie listy pobranych artykulow
+    articlesContainer.innerHTML = articles.map(article => {
+        // Formatowanie daty do formatu DD-MM-YYYY (Zadanie dodatkowe 1)
+        const formattedDate = dayjs(article.created_at).format('DD-MM-YYYY');[cite: 75]
 
-        const today = dayjs();
-        const birthdate = dayjs(birthdateInput);
+        return `
+      <article class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition">
+        <h3 class="text-2xl font-bold text-gray-900 mb-1">${article.title}</h3>
+        <h4 class="text-lg text-gray-500 font-medium mb-3">${article.subtitle}</h4>
+        
+        <div class="flex items-center text-xs text-gray-400 space-x-2 mb-4">
+          <span class="font-semibold text-gray-600">${article.author}</span>
+          <span>•</span>
+          <span>${formattedDate}</span>
+        </div>
+        
+        <p class="text-gray-700 whitespace-pre-line leading-relaxed">${article.content}</p>
+        
+        ${article.tags ? `
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            ${article.tags.map(tag => `<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">#${tag}</span>`).join('')}
+          </div>
+        ` : ''}
+      </article>
+    `;
+    }).join('');
+}
 
-        const daysSinceBirth = today.diff(birthdate, 'days');
+// Obsluga wysylania formularza (Tworzenie nowego artykulu)
+articleForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-        const isBirthdayToday = today.month() === birthdate.month() && today.date() === birthdate.date();
+    const title = document.getElementById('title').value;
+    const subtitle = document.getElementById('subtitle').value;
+    const author = document.getElementById('author').value;
+    const content = document.getElementById('content').value;
+    const createdAtInput = document.getElementById('createdAt').value;
 
-        if (isBirthdayToday) {
-            alert("Wszystkiego najlepszego!");
-        }
+    // Obiekt z danymi do wyslania
+    const newArticle = {
+        title,
+        subtitle,
+        author,
+        content
+    };
 
-        let nextBirthday = birthdate.year(today.year());
+    // Jesli u¿ytkownik podal wlasna date, dodaj ja (Zadanie dodatkowe 3)
+    if (createdAtInput) {
+        newArticle.created_at = dayjs(createdAtInput).toISOString();[cite: 78, 79]
+    }
 
-        if (nextBirthday.isBefore(today, 'day')) {
-            nextBirthday = nextBirthday.add(1, 'year');
-        }
+    // Zapytanie POST do API Supabase
+    const { error } = await supabase
+        .from('article')
+        .insert([newArticle]);[cite: 69]
 
-        const daysUntilBirthday = nextBirthday.diff(today, 'days');
-        const weeksUntilBirthday = Math.floor(daysUntilBirthday / 7);
+    if (error) {
+        alert('Blad podczas dodawania artykulu: ' + error.message);
+        return;
+    }
 
-        let htmlContent = `<p class="font-semibold">Od Twoich narodzin minelo: ${daysSinceBirth} dni.</p>`;
-
-        if (!isBirthdayToday) {
-            if (daysUntilBirthday > 0 && daysUntilBirthday <= 7) {
-                htmlContent += `<p class="font-bold mt-2">Masz urodziny w tym tygodniu!</p>`;
-            } else {
-                htmlContent += `<p class="mt-2">Do Twoich kolejnych urodzin pozostalo tygodni: ${weeksUntilBirthday}</p>`;
-            }
-        }
-
-        dialogContent.innerHTML = htmlContent;
-        dialog.showModal();
-    });
-
-    closeDialogBtn.addEventListener('click', () => {
-        dialog.close();
-    });
-
-    dialog.addEventListener('click', (e) => {
-        if (e.target === dialog) {
-            dialog.close();
-        }
-    });
-
+    // Reset formularza i odswiezenie widoku
+    articleForm.reset();
+    fetchArticles();
 });
+
+// Nasluchiwanie zmiany kryterium sortowania
+sortSelect.addEventListener('change', fetchArticles);[cite: 76]
+
+// Pierwsze uruchomienie po zaladowaniu skryptu
+fetchArticles();

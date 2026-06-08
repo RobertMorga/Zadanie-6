@@ -3,34 +3,65 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kalkulator Urodzinowy</title>
+    <title>Laboratorium 6 - Supabase Blog</title>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-50 min-h-screen p-8 text-gray-800">
 
-    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold text-primary mb-6 text-center">Kalkulator Urodzinowy</h1>
+    <div class="max-w-3xl mx-auto space-y-12">
 
-        <form id="birthdayForm" class="space-y-4">
-            <div>
-                <label for="birthdate" class="block text-sm font-medium text-gray-700">Wybierz datę urodzenia:</label>
-                <input type="date" id="birthdate" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 p-2 border" />
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Artykuly z bazy Supabase</h1>
+
+            <div class="mt-4 sm:mt-0">
+                <label for="sortSelect" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Sortowanie</label>
+                <select id="sortSelect" class="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="created_at.desc">po dacie malejąco</option>
+                    <option value="created_at.asc">po dacie rosnąco</option>
+                    <option value="title.asc">po nazwie alfabetycznie</option>
+                </select>
             </div>
+        </header>
 
-            <button type="submit" class="w-full bg-blue-300 text-gray-800 font-semibold p-4 rounded hover:bg-blue-400 transition">
-                Oblicz
-            </button>
-        </form>
+        <main id="articlesContainer" class="space-y-6">
+            <p class="text-gray-500 animate-pulse">Ladowanie artykulow...</p>
+        </main>
+
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 class="text-xl font-bold mb-4 text-gray-900">Dodaj nowy artykul</h2>
+
+            <form id="articleForm" class="space-y-4">
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Tytul</label>
+                    <input type="text" id="title" required class="mt-1 block w-full rounded border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+
+                <div>
+                    <label for="subtitle" class="block text-sm font-medium text-gray-700">Podtytul</label>
+                    <input type="text" id="subtitle" required class="mt-1 block w-full rounded border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+
+                <div>
+                    <label for="author" class="block text-sm font-medium text-gray-700">Autor</label>
+                    <input type="text" id="author" required class="mt-1 block w-full rounded border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+
+                <div>
+                    <label for="createdAt" class="block text-sm font-medium text-gray-700">Data utworzenia (opcjonalnie)</label>
+                    <input type="datetime-local" id="createdAt" class="mt-1 block w-full rounded border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+
+                <div>
+                    <label for="content" class="block text-sm font-medium text-gray-700">Tresc</label>
+                    <textarea id="content" rows="5" required class="mt-1 block w-full rounded border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded hover:bg-blue-700 transition shadow-sm text-sm">
+                    Opublikuj artykul
+                </button>
+            </form>
+        </section>
+
     </div>
-
-    <dialog id="resultDialog" class="bg-gray-200 text-red-600 p-6 rounded-lg shadow-xl relative max-w-sm w-full backdrop:bg-black/50">
-
-        <button id="closeDialog" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 font-bold text-xl">
-            &times;
-        </button>
-
-        <div id="dialogContent" class="mt-4 space-y-2">
-        </div>
-    </dialog>
 
     <script type="module" src="/src/main.js"></script>
 </body>
